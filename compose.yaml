@@ -1,12 +1,12 @@
 services:
+  redis:
+    image: redis
+    ports:
+      - 6379  
   app:
-    image: testtask
+    image: fib_project
     ports:
       - 127.0.0.1:5000:5000
     working_dir: /app
     volumes:
       - ./src/:/app
-  redis:
-    image: redis
-    ports:
-      - 6379  

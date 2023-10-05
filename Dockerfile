@@ -5,7 +5,7 @@ WORKDIR /app
 
 COPY requirements.txt .
 RUN pip install -r requirements.txt
-COPY . /app
+COPY ./src /app
 ENTRYPOINT ["python"]
-CMD ["src/hello.py"]
+CMD ["hello.py"]
 EXPOSE 5000
