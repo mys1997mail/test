@@ -4,7 +4,6 @@ app = Flask(__name__)
 
 cache = redis.Redis(host = "redis")
 
-#test
 def fibonacci(n):
     a, b, res = 1, 1, 1
     if n <= 1:
@@ -42,4 +41,4 @@ def hello():
     return jsonify(result)
 
 if __name__ == '__main__':
-    app.run(debug=True,host='0.0.0.0')
+    app.run(debug=True, host='0.0.0.0')
