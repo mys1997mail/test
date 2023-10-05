@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Артем пидарас!</title>
+</head>
+<body>
+    <h1>Input from, to</h1>
+    <form method="POST" action="/">
+        <input type="number" name="num1" placeholder="Число 1" required>
+        <input type="number" name="num2" placeholder="Число 2" required>
+        <button type="submit">Показать список</button>
+    </form>
+    {% if numbers %}
+        <h2>Список чисел:</h2>
+        <ul>
+            {% for number in numbers %}
+                <li>{{ number }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</body>
+</html>
