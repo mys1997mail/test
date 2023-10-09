@@ -4,6 +4,28 @@ app = Flask(__name__)
 
 cache = redis.Redis(host = "redis")
 
+class InvalidUsage(Exception):
+    status_code = 422
+
+    def __init__(self, message, status_code = None, payload = None):
+        Exception.__init__(self)
+        self.message = message
+        if not status_code:
+            self.status_code = status_code
+        self.payload = payload
+
+    def to_dict(self):
+        rv = {"message": self.message}
+        if self.payload:
+            rv['payload'] = self.payload
+        return rv
+
+@app.errorhandler(InvalidUsage)
+def handle_invalid_usage(error):
+    response = jsonify(error.to_dict())
+    response.status_code = error.status_code
+    return response
+
 def fibonacci(n):
     a, b, res = 1, 1, 1
     if n <= 1:
@@ -15,18 +37,26 @@ def fibonacci(n):
             b = res
     return res
 
+def get_index_from_request(arg_name):
+    index = request.args.get(arg_name)
+    return int(index) if index and index.isdigit() else None
+
 @app.route('/fib')
 def hello():
-    from_index = request.args.get('from')
-    from_index = int(from_index) if from_index and from_index.isdigit() else None
-    to_index = request.args.get('to')
-    to_index = int(to_index) if to_index and to_index.isdigit() else None
-    if not from_index and not to_index:
-        raise Exception(f"Wrong params in request. Should be contain one of (from, to) at least")
-    if not from_index:
-        from_index = 1
-    if not to_index:
-        to_index = from_index
+    from_index = get_index_from_request('from') or 1
+    to_index = get_index_from_request('to') or from_index
+
+    if from_index is None and to_index is None:
+        raise InvalidUsage("Wrong params in request. Should contain at least one of (from, to)")
+    
+    if to_index < from_index:
+        raise InvalidUsage("'To' parameter shoulb be greater or equal than 'from' parameter")
+    
+    result = get_fibonacci_for_range(from_index, to_index)
+
+    return jsonify(result)
+
+def get_fibonacci_for_range(from_index, to_index):
     result = []
     for i in range(from_index, to_index + 1):
         cachedValue = cache.get(i)
@@ -38,7 +68,7 @@ def hello():
             temp = fibonacci(i)
             cache.set(i, temp)
             result.append(temp)
-    return jsonify(result)
+    return result
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
